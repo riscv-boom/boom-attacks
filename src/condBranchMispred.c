@@ -4,6 +4,6 @@
 #include "cache.h"
 
 int main(void){
-    printf("Hello, world: $Sz(%d)\n", L1_SZ_BYTES);
+    printf("Hello, world\n");
     return 0;
 }
