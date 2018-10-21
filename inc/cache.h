@@ -13,7 +13,7 @@
  *
  * @param 
  */
-void flushCache(int addr){
+void flushCache(int addr, int size){
     // Do something to flush cache here
 }
 
