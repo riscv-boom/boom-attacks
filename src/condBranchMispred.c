@@ -2,6 +2,7 @@
 #include <stdint.h>
 
 #include "cache.h"
+#include "riscv-util.h"
 
 #define PAGE_SZ 512
 #define ARRAY1_SZ 16
@@ -19,8 +20,6 @@ uint8_t min(uint64_t* results, uint64_t sz){
     }
     return minVal;
 }
-
-
 
 uint8_t dummy = 0;
 void victimFunc(uint64_t idx){
@@ -45,9 +44,9 @@ int main(void){
 
         // read out array 2 and see the hit secret value
         for (uint8_t i = 0; i < 256; ++i){
-            uint64_t start = readTime();
+            uint64_t start = RDCYCLE;
             uint8_t dummy = array2[i*PAGE_SZ];
-            uint64_t end = readTime();
+            uint64_t end = RDCYCLE;
         
             results[i] = end - start;
         }
