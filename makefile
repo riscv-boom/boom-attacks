@@ -21,13 +21,15 @@ DEPFLAGS=-MT $@ -MMD -MP -MF $(DEP)/$*.d
 
 # Programs to compile
 PROGRAMS=condBranchMispred returnStackBuffer
+BINS=$(addprefix $(BIN)/,$(addsuffix .riscv,$(PROGRAMS)))
+DUMPS=$(addprefix $(DMP)/,$(addsuffix .dump,$(PROGRAMS)))
+
 
 # Include dependencies
 -include $(addprefix $(DEP)/,$(addsuffix .d,$(PROGRAMS)))
 
-default: $(addprefix $(BIN)/,$(addsuffix .riscv,$(PROGRAMS)))
-
-dumps: $(addprefix $(DMP)/,$(addsuffix .dump,$(PROGRAMS)))
+all: $(BINS)
+dumps: $(DUMPS)
 
 # Build object files
 $(OBJ)/%.o: $(SRC)/%.S
