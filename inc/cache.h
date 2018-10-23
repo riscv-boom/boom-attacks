@@ -24,8 +24,8 @@
  */
 
 // setup array size of cache to "put" in the cache on $ flush
-// gaurantees contiguous set of addrs that is sz of cache
-uint8_t badMem[2*L1_SZ_BYTES]
+// guarantees contiguous set of addrs that is at least the sz of cache
+uint8_t dummyMem[2 * L1_SZ_BYTES];
 
 /**
  * Flush the cache of the address given since RV64 does not have a
@@ -36,21 +36,35 @@ uint8_t badMem[2*L1_SZ_BYTES]
  * @param sz size of the data to remove in bytes
  */
 void flushCache(uint64_t addr, uint64_t sz){
-    // get the starting address that you want to clear from
-    uint64_t baseAddr = addr & TAG_MASK; 
+    printf("addr(0x%x) sz(%d)\n", addr, sz);
 
     // find out the amount of blocks you want to clear
-    uint64_t numBlocksClear = sz >> L1_BLOCK_SZ_BYTES;
-    if (sz & IDX_MASK != 0){
+    uint64_t numBlocksClear = sz >> L1_BLOCK_BITS;
+    if ((sz & IDX_MASK) != 0){
         numBlocksClear += 1;
     }
 
+    // temp variable used for nothing
     uint8_t dummy = 0;
+
+    // this mem address is the start of a contiguous set of memory that will fit inside of the
+    // cache
+    // thus it has the following properties
+    // 1. dummyMem <= alignedMem < dummyMem + sizeof(dummyMem)
+    // 2. alignedMem has idx = 0 and offset = 0 
+    uint8_t alignedMem = (((uint64_t)&dummyMem) + L1_SZ_BYTES) & TAG_MASK;
     for (uint64_t i = 0; i < numBlocksClear; ++i){
+        // offset to move across the sets that you want to flush
+        uint64_t setOffset = ((((addr & IDX_MASK) >> L1_SET_BITS) + i) % L1_SETS) * L1_BLOCK_SZ_BYTES;
+
+        // since there are L1_WAYS you need to flush the entire set
         for(uint64_t j = 0; j < L1_WAYS; ++j){
-            // this is aligned to the cache, now dump the sets
-            uint8_t* newMem = ((&badMem + L1_SZ_BYTES) & (TAG_MASK));
-            dummy &= *( newMem + ((addr & IDX_MASK) >> L1_SET_BITS)*BLOCK_SZ + (j*L1_BLOCK_SZ_BYTES*NUM_SETS) )
+            // offset to reaccess the set
+            uint64_t wayOffset = j * L1_BLOCK_SZ_BYTES * L1_SETS;
+
+            // evict the previous cache block and put in the dummy mem
+            dummy &= *((uint8_t*)(alignedMem + setOffset + wayOffset));
+            printf("evict read(0x%x)\n", alignedMem + setOffset + wayOffset);
         }
     }
 }
