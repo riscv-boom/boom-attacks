@@ -24,7 +24,8 @@
  */
 
 // setup array size of cache to "put" in the cache on $ flush
-uint8_t badMem[L1_SETS][L1_WAYS][L1_BLOCK_SZ_BYTES];
+// gaurantees contiguous set of addrs that is sz of cache
+uint8_t badMem[2*L1_SZ_BYTES]
 
 /**
  * Flush the cache of the address given since RV64 does not have a
@@ -44,20 +45,12 @@ void flushCache(uint64_t addr, uint64_t sz){
         numBlocksClear += 1;
     }
 
-    /* if( &badMem & offmask )
-     *      // need to align to the block
-     * else- (&badMem
-     */
-    /* &badMem can be anything
-     * (L1_BLOCK_SZ_BYTES - (&badMem & IDX_MASK)) is the offset you need to be back at 0
-     * (offset + (addr & IDX_MASK) % L1_SETS is the access to the set that you want
-     * Need to access this L1_WAYS amount of times
-     */
-
     uint8_t dummy = 0;
     for (uint64_t i = 0; i < numBlocksClear; ++i){
         for(uint64_t j = 0; j < L1_WAYS; ++j){
-            dummy &= badMem[((L1_BLOCK_SZ_BYTES - (&badMem & IDX_MASK)) + (addr & IDX_MASK) % L1_SETS][j][0];
+            // this is aligned to the cache, now dump the sets
+            uint8_t* newMem = ((&badMem + L1_SZ_BYTES) & (TAG_MASK));
+            dummy &= *( newMem + ((addr & IDX_MASK) >> L1_SET_BITS)*BLOCK_SZ + (j*L1_BLOCK_SZ_BYTES*NUM_SETS) )
         }
     }
 }
