@@ -45,7 +45,7 @@ int main(void){
         // read out array 2 and see the hit secret value
         for (uint8_t i = 0; i < 256; ++i){
             uint64_t start = RDCYCLE;
-            uint8_t dummy = array2[i*PAGE_SZ];
+            uint8_t dummy &= array2[i*PAGE_SZ];
             uint64_t end = RDCYCLE;
         
             results[i] = end - start;

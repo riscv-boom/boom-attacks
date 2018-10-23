@@ -43,7 +43,7 @@ int main(void){
         // read in the secret data
         for (uint8_t i = 0; i < 256; ++i){
             uint64_t start = RDCYCLE;
-            uint8_t dummy = attackArray[i*L1_LINE_SZ_BYTES];
+            uint8_t dummy &= attackArray[i*L1_LINE_SZ_BYTES];
             uint64_t end = RDCYCLE;
         
             results[i] = end - start;
