@@ -30,13 +30,16 @@ uint8_t dummyMem[2 * L1_SZ_BYTES];
 /**
  * Flush the cache of the address given since RV64 does not have a
  * clflush type of instruction. Clears any set that has the same idx bits
- * as the address input range
+ * as the address input range.
+ *
+ * Note: This does not work if you are trying to flush dummyMem out of the
+ * cache.
  *
  * @param addr starting address to clear the cache
  * @param sz size of the data to remove in bytes
  */
 void flushCache(uint64_t addr, uint64_t sz){
-    printf("addr(0x%x) sz(%d)\n", addr, sz);
+    //printf("Flushed addr(0x%x) sz(%d)\n", addr, sz);
 
     // find out the amount of blocks you want to clear
     uint64_t numBlocksClear = sz >> L1_BLOCK_BITS;
@@ -52,19 +55,28 @@ void flushCache(uint64_t addr, uint64_t sz){
     // thus it has the following properties
     // 1. dummyMem <= alignedMem < dummyMem + sizeof(dummyMem)
     // 2. alignedMem has idx = 0 and offset = 0 
-    uint8_t alignedMem = (((uint64_t)&dummyMem) + L1_SZ_BYTES) & TAG_MASK;
+    uint64_t alignedMem = (((uint64_t)&dummyMem) + L1_SZ_BYTES) & TAG_MASK;
+    //printf("alignedMem(0x%x)\n", alignedMem);
+
+    if (numBlocksClear > L1_SETS){
+        // flush entire cache with no rollover (makes the function finish faster) 
+        numBlocksClear = L1_SETS;
+    }
+        
     for (uint64_t i = 0; i < numBlocksClear; ++i){
         // offset to move across the sets that you want to flush
-        uint64_t setOffset = ((((addr & IDX_MASK) >> L1_SET_BITS) + i) % L1_SETS) * L1_BLOCK_SZ_BYTES;
+        uint64_t setOffset = (((addr & IDX_MASK) >> L1_SET_BITS) + i) * L1_BLOCK_SZ_BYTES;
+        //printf("setOffset(0x%x)\n", setOffset);
 
         // since there are L1_WAYS you need to flush the entire set
         for(uint64_t j = 0; j < L1_WAYS; ++j){
             // offset to reaccess the set
             uint64_t wayOffset = j * L1_BLOCK_SZ_BYTES * L1_SETS;
+            //printf("wayOffset(0x%x)\n", wayOffset);
 
             // evict the previous cache block and put in the dummy mem
             dummy &= *((uint8_t*)(alignedMem + setOffset + wayOffset));
-            printf("evict read(0x%x)\n", alignedMem + setOffset + wayOffset);
+            //printf("evict read(0x%x)\n", alignedMem + setOffset + wayOffset);
         }
     }
 }
