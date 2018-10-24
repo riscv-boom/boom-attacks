@@ -5,7 +5,7 @@
 // TODO: check that these parameters are right
 #define L1_SETS 64
 #define L1_SET_BITS 6 // note: this is log2Ceil(L1_SETS)
-#define L1_WAYS 4
+#define L1_WAYS 8 //note: this looks like there are 8 ways
 #define L1_BLOCK_SZ_BYTES 64
 #define L1_BLOCK_BITS 6 // note: this is log2Ceil(L1_BLOCK_SZ_BYTES)
 #define L1_SZ_BYTES (L1_SETS*L1_WAYS*L1_BLOCK_SZ_BYTES)
