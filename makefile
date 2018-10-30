@@ -15,12 +15,12 @@ DEP=dep
 # Commands and flags
 GCC=riscv64-unknown-elf-gcc
 OBJDUMP=riscv64-unknown-elf-objdump -S
-CFLAGS=-mcmodel=medany -std=gnu99 -g -O0 -fno-common -fno-builtin-printf -Wall -I$(INC) -Wno-unused-function -Wno-unused-variable
+CFLAGS=-mcmodel=medany -std=gnu99 -O0 -g -fno-common -fno-builtin-printf -Wall -I$(INC) -Wno-unused-function -Wno-unused-variable
 LDFLAGS=-static -nostdlib -nostartfiles -lgcc
 DEPFLAGS=-MT $@ -MMD -MP -MF $(DEP)/$*.d
 
 # Programs to compile
-PROGRAMS=condBranchMispred returnStackBuffer
+PROGRAMS=condBranchMispred returnStackBuffer loop
 BINS=$(addprefix $(BIN)/,$(addsuffix .riscv,$(PROGRAMS)))
 DUMPS=$(addprefix $(DMP)/,$(addsuffix .dump,$(PROGRAMS)))
 
