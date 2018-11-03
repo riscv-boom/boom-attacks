@@ -4,13 +4,16 @@
 int dummy = 0;
 int main (void){
     // Enable user/supervisor use of perf counters             
-    //write_csr(mcounteren, -1);                                
-    //write_csr(scounteren, -1);   
+    write_csr(mcounteren, -1);                                
+    write_csr(scounteren, -1);   
 
     // Set the HPM event selectors as desired for your specific micro-architecture
-    //write_csr(mhpmevent3, 0x0401); // read in the br misspred
-    //write_csr(mhpmevent4, 0x0801); // read in the br jalr mispred
-    //write_csr(mhpmevent5, 0x2001); // read in the br resolve
+    write_csr(mhpmevent3, 0x0401); // read in the br misspred
+    write_csr(mhpmevent4, 0x0801); // read in the br jalr mispred
+    write_csr(mhpmevent5, 0x2001); // read in the br resolve
+    write_csr(mhpmevent6, 0x0200); // read in nop
+    write_csr(mhpmevent7, 0x0400); // read in nop
+    write_csr(mhpmevent8, 0x0800); // read in nop
 
     //write_csr(mhpmevent3,  0x0001); // read in the br misspred
     //write_csr(mhpmevent4,  0x0002); // read in the br jalr mispred
@@ -53,9 +56,10 @@ int main (void){
 //        }
     }
 
-    //printf("(BR Mispred, BR JALR Mispred, BR Resolve): (%u, %u, %u)\n", read_csr(mhpmcounter3), read_csr(mhpmcounter4), read_csr(mhpmcounter5));
-    //printf("(cycle): (%u)\n", read_csr(cycle));
-    //printf("(instret): (%u)\n", read_csr(instret));
+    printf("(BR Mispred, BR JALR Mispred, BR Resolve): (%lu, %lu, %lu)\n", read_csr(hpmcounter3), read_csr(hpmcounter4), read_csr(hpmcounter5));
+    printf("(0,0,0): (%lu, %lu, %lu)\n", read_csr(hpmcounter6), read_csr(hpmcounter7), read_csr(hpmcounter8));
+    printf("(cycle): (%lu)\n", read_csr(cycle));
+    printf("(instret): (%lu)\n", read_csr(instret));
     //printf("(cntr3): (%u)\n", read_csr(mhpmcounter3));
     //printf("(cntr4): (%u)\n", read_csr(mhpmcounter4));
     //printf("(cntr5): (%u)\n", read_csr(mhpmcounter5));

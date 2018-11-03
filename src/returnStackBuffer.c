@@ -1,8 +1,7 @@
 #include <stdio.h>
 #include <stdint.h>
-
 #include "cache.h"
-#include "riscv-util.h"
+#include "encoding.h"
 
 uint8_t attackArray[256*L1_BLOCK_SZ_BYTES];
 uint64_t results[256];
@@ -40,9 +39,9 @@ int main(void){
         
         // read in the secret data
         for (uint8_t i = 0; i < 256; ++i){
-            uint64_t start = RDCYCLE;
+            uint64_t start = rdcycle();
             dummy &= attackArray[i*L1_BLOCK_SZ_BYTES];
-            uint64_t end = RDCYCLE;
+            uint64_t end = rdcycle();
         
             results[i] = end - start;
         }
