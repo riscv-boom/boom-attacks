@@ -20,7 +20,7 @@ LDFLAGS=-static -nostdlib -nostartfiles -lgcc
 DEPFLAGS=-MT $@ -MMD -MP -MF $(DEP)/$*.d
 
 # Programs to compile
-PROGRAMS=condBranchMispred returnStackBuffer loop Cbm-v2
+PROGRAMS=condBranchMispred returnStackBuffer
 BINS=$(addprefix $(BIN)/,$(addsuffix .riscv,$(PROGRAMS)))
 DUMPS=$(addprefix $(DMP)/,$(addsuffix .dump,$(PROGRAMS)))
 
