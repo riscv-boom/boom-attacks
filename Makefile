@@ -42,9 +42,9 @@ $(OBJ)/%.o: $(SRC)/%.c
 	$(GCC) $(CFLAGS) $(DEPFLAGS) -c $< -o $@
 
 # Build executable
-$(BIN)/%.riscv: $(OBJ)/%.o $(OBJ)/crt.o $(OBJ)/syscalls.o $(LNK)/link.ld
+$(BIN)/%.riscv: $(OBJ)/%.o $(OBJ)/crt.o $(OBJ)/syscalls.o $(OBJ)/stack.o $(LNK)/link.ld
 	@mkdir -p $(BIN)
-	$(GCC) -T $(LNK)/link.ld $(LDFLAGS) $< $(OBJ)/crt.o $(OBJ)/syscalls.o -o $@
+	$(GCC) -T $(LNK)/link.ld $(LDFLAGS) $< $(OBJ)/crt.o $(OBJ)/stack.o $(OBJ)/syscalls.o -o $@
 
 # Build dump
 $(DMP)/%.dump: $(BIN)/%.riscv
