@@ -4,11 +4,12 @@ This repository holds all the work-in-progress code used to check if BOOM is sus
 
 ## Project Members
 
-Name - Github Handle
-Abraham Gonzalez - abejgonzalez
-Ed Younis - riyt
-Ben Korpan - bkorpan
-Jerry Zhao - jerry123
+| Name             | Github Handle |
+| ---------------- | ------------- |
+| Abraham Gonzalez | abejgonzalez  |
+| Ed Younis        | riyt          |
+| Ben Korpan       | bkorpan       |
+| Jerry Zhao       | jerry123      |
 
 ## BOOM Configuration
 
