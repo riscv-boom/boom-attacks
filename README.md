@@ -2,7 +2,7 @@
 
 This repository holds all the work-in-progress code used to check if BOOM is susceptible to Spectre attacks.
 
-## Project Members
+# Project Members
 
 | Name             | Github Handle |
 | ---------------- | ------------- |
@@ -10,6 +10,8 @@ This repository holds all the work-in-progress code used to check if BOOM is sus
 | Ed Younis        | riyt          |
 | Ben Korpan       | bkorpan       |
 | Jerry Zhao       | jerry123      |
+
+# Further Details
 
 ## BOOM Configuration
 
