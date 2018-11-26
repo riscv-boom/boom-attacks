@@ -1,4 +1,4 @@
-# BOOM Spectre Attacks
+# BOOM Speculative Attacks
 
 This repository holds all the work-in-progress code used to check if BOOM is susceptible to Spectre attacks.
 
@@ -60,6 +60,10 @@ The following attacks are in-progress and are not working yet.
 # Building the tests
 
 To build you need to run `make all` not just normal `make`
+
+# Running the Tests
+
+This builds "baremetal" binaries that can directly run on the BOOM configuration that was specified above.
 
 # References
 
