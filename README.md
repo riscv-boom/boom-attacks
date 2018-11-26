@@ -15,7 +15,7 @@ This repository holds all the work-in-progress code used to check if BOOM is sus
 
 ## BOOM Configuration
 
-This is working with version of BOOM located at github.com/riscv-boom/riscv-boom (Commit: 8bb0e34feedf6d7b2465b10e0e166fec988b0396)
+This is working with the version of BOOM located at https://github.com/riscv-boom/riscv-boom/commit/8bb0e34feedf6d7b2465b10e0e166fec988b0396.
 
 ```
 Processor Details:
