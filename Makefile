@@ -20,7 +20,7 @@ LDFLAGS=-static -nostdlib -nostartfiles -lgcc
 DEPFLAGS=-MT $@ -MMD -MP -MF $(DEP)/$*.d
 
 # Programs to compile
-PROGRAMS=condBranchMispred returnStackBuffer indirBranchMispred
+PROGRAMS=condBranchMispred returnStackBuffer indirBranchMispred helloWorld ubench_multiloadmiss ubench_multiloadmisstodiffcl ubench_multispecloads ubench_multispecloadtodiffcl
 BINS=$(addprefix $(BIN)/,$(addsuffix .riscv,$(PROGRAMS)))
 DUMPS=$(addprefix $(DMP)/,$(addsuffix .dump,$(PROGRAMS)))
 
