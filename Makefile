@@ -14,7 +14,7 @@ DEP=dep
 
 # Commands and flags
 GCC=riscv64-unknown-elf-gcc
-OBJDUMP=riscv64-unknown-elf-objdump -S
+OBJDUMP=riscv64-unknown-elf-objdump
 CFLAGS=-mcmodel=medany -std=gnu99 -O0 -g -fno-common -fno-builtin-printf -Wall -I$(INC) -Wno-unused-function -Wno-unused-variable
 LDFLAGS=-static -nostdlib -nostartfiles -lgcc
 DEPFLAGS=-MT $@ -MMD -MP -MF $(DEP)/$*.d
@@ -23,13 +23,14 @@ DEPFLAGS=-MT $@ -MMD -MP -MF $(DEP)/$*.d
 PROGRAMS=condBranchMispred returnStackBuffer indirBranchMispred demo
 BINS=$(addprefix $(BIN)/,$(addsuffix .riscv,$(PROGRAMS)))
 DUMPS=$(addprefix $(DMP)/,$(addsuffix .dump,$(PROGRAMS)))
+DUMPS_RAW=$(addprefix $(DMP)/,$(addsuffix .dumpraw,$(PROGRAMS)))
 
 
 # Include dependencies
 -include $(addprefix $(DEP)/,$(addsuffix .d,$(PROGRAMS)))
 
-all: $(BINS) $(DUMPS)
-dumps: $(DUMPS)
+all: $(BINS) $(DUMPS) $(DUMPS_RAW)
+dumps: $(DUMPS) $(DUMPS_RAW)
 
 # Build object files
 $(OBJ)/%.o: $(SRC)/%.S
@@ -48,6 +49,10 @@ $(BIN)/%.riscv: $(OBJ)/%.o $(OBJ)/crt.o $(OBJ)/syscalls.o $(OBJ)/stack.o $(LNK)/
 
 # Build dump
 $(DMP)/%.dump: $(BIN)/%.riscv
+	@mkdir -p $(DMP)
+	$(OBJDUMP) -S -D $< > $@
+
+$(DMP)/%.dumpraw: $(BIN)/%.riscv
 	@mkdir -p $(DMP)
 	$(OBJDUMP) -D $< > $@
 
