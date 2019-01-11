@@ -240,6 +240,8 @@ int main(void){
     printf("\nPrint out \"secret\" array\n");
     printf("--------------------------\n");
 
+    char firstGuess[SECRET_SZ + 1] = {0};
+
     // try to read out the secret
     for(uint64_t len = 0; len < SECRET_SZ; ++len){
 
@@ -290,12 +292,22 @@ int main(void){
         uint64_t hitArray[2];
         topTwoIdx(results, 256, output, hitArray);
 
-        printf("%p: want(%c) =?= first guess(%c) amount of hits(%2d/%d) | second guess(%c) amount of hits(%2d/%d)\n", (uint8_t*)(array1 + attackIdx), secretString[len], output[0], hitArray[0], ATTACK_SAME_ROUNDS, output[1], hitArray[1], ATTACK_SAME_ROUNDS);
+        if ( output[1] >= 32 && output[1] <= 126 ){
+            printf("%p: want(%c) =?= first guess(%c) amount of hits(%2d/%d) | second guess(%c) amount of hits(%2d/%d)\n", (uint8_t*)(array1 + attackIdx), secretString[len], output[0], hitArray[0], ATTACK_SAME_ROUNDS, output[1], hitArray[1], ATTACK_SAME_ROUNDS);
+        }
+        else {
+            printf("%p: want(%c) =?= first guess(%c) amount of hits(%2d/%d) | second guess(decimal(%d)) amount of hits(%2d/%d)\n", (uint8_t*)(array1 + attackIdx), secretString[len], output[0], hitArray[0], ATTACK_SAME_ROUNDS, output[1], hitArray[1], ATTACK_SAME_ROUNDS);
+        }
+        firstGuess[len] = output[0];
 
         // read in the next secret 
         ++attackIdx;
     }
 
+    printf("\nFinal Overall Guess of Secret String\n");
+    printf("------------------------------------\n");
+    printf("Actual:         %s\n", secretString);
+    printf("Spectre Attack: %s\n", firstGuess);
 
     return 0;
 }
