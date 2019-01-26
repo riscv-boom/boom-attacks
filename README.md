@@ -61,7 +61,7 @@ The following attacks are in-progress and are not working yet.
 
 # Building the tests
 
-To build you need to run `make all` not just normal `make`
+To build you need to run `make`
 
 # Running the Tests
 
